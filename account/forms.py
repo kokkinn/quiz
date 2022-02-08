@@ -6,7 +6,8 @@ from django.core.exceptions import ValidationError
 
 # from .utils import send_activation_notification
 
-from .apps import user_registered
+# from .apps import user_registered
+from .utils import send_activation_notification
 
 
 class AccountRegistrationForm(forms.ModelForm):
@@ -48,8 +49,8 @@ class AccountRegistrationForm(forms.ModelForm):
         if commit:
             user.save()
 
-        # send_activation_notification(user)
-        user_registered.send(AccountRegistrationForm, instance=user)
+        send_activation_notification(user)
+        # user_registered.send(AccountRegistrationForm, instance=user)
 
         return user
 
