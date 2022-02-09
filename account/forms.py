@@ -6,7 +6,9 @@ from django.core.exceptions import ValidationError
 
 # from .utils import send_activation_notification
 
+# from .apps import user_registered
 from .apps import user_registered
+from .utils import send_activation_notification
 
 
 class AccountRegistrationForm(forms.ModelForm):
