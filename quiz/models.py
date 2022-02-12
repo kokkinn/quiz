@@ -29,6 +29,7 @@ class Exam(BaseModel):
         verbose_name = 'Exam'
         verbose_name_plural = 'Exams'
 
+
 class Question(BaseModel):
     exam = models.ForeignKey(Exam, related_name='questions', on_delete=models.CASCADE)
     order_num = models.PositiveSmallIntegerField()
@@ -77,7 +78,7 @@ class Result(BaseModel):
         correct_choice = [choice.is_correct for choice in question.choices.all()]
         correct_answer = True
         for z in zip(selected_choices, correct_choice):
-            correct_answer &= (z[0] == z[1])        # correct_answer = correct_answer & (z[0] == z[1])
+            correct_answer = correct_answer & (z[0] == z[1])  # correct_answer &= (z[0] == z[1])
 
         """
             True    True        True

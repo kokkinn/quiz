@@ -1,6 +1,4 @@
-from django.contrib import admin
-
-from django.contrib import admin    # noqa
+from django.contrib import admin  # noqa
 
 from django.contrib import admin
 
@@ -26,7 +24,7 @@ class QuestionInline(admin.TabularInline):
     fields = ('text', 'order_num')
     show_change_link = True
     extra = 0
-    ordering = ('order_num', )
+    ordering = ('order_num',)
     formset = QuestionInlineFormset
 
 

@@ -8,16 +8,8 @@ from quiz.models import Choice
 
 class ChoicesInlineFormset(BaseInlineFormSet):
     def clean(self):
-        # lst = []
-        # for form in self.forms:
-        #     if form.cleaned_data['is_correct']:
-        #         lst.append(1)
-        #     else:
-        #         lst.append(0)
 
         num_correct_answers = sum(form.cleaned_data['is_correct'] for form in self.forms)
-
-        # num_correct_answers = sum(lst)
 
         if num_correct_answers == 0:
             raise ValidationError('Необходимо выбрать как минимум 1 вариант.')
