@@ -54,19 +54,10 @@ class ExamResultCreateView(LoginRequiredMixin, CreateView):
             state=Result.STATE.NEW,
             current_order_number=0
         )
-
         result.save()
 
         return HttpResponseRedirect(
-            reverse(
-                'quizzes:question',
-                kwargs={
-                    'uuid': uuid,
-                    'res_uuid': result.uuid,
-                    # 'order_num': 1
-                }
-            )
-        )
+            reverse('quizzes:question', kwargs={'uuid': uuid, 'res_uuid': result.uuid}))
 
 
 class ExamResultQuestionView(LoginRequiredMixin, UpdateView):
@@ -75,16 +66,16 @@ class ExamResultQuestionView(LoginRequiredMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         uuid = kwargs.get('uuid')
-        # order_num = kwargs.get('order_num')
-        # result = Result.objects.get(uuid=kwargs.get('res_uuid'))
-        result = self.__get_res_by_uuid(**kwargs)
+        result = self.__get_res_by_uuid(**kwargs)  # достаем объект result по uuid
+
         question = Question.objects.get(
             exam__uuid=uuid,
-            # order_num=order_num
             order_num=result.current_order_number + 1
         )
 
-        choices = ChoicesFormSet(queryset=question.choices.all())
+        choices = ChoicesFormSet(
+            queryset=question.choices.all()
+        )
 
         return render(request, 'exams/question.html',
                       context={'question': question, 'choices': choices})
@@ -92,18 +83,15 @@ class ExamResultQuestionView(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         uuid = kwargs.get('uuid')
         res_uuid = kwargs.get('res_uuid')
-        # order_num = kwargs.get('order_num')
-
         result = self.__get_res_by_uuid(**kwargs)
         question = Question.objects.get(
             exam__uuid=uuid,
-            # order_num=order_num
             order_num=result.current_order_number + 1
         )
         choices = ChoicesFormSet(data=request.POST)
-        selected_choices = ['is_selected' in form.changed_data for form in choices.forms]
+        selected_choices = ['is_selected' in form.changed_data for form in
+                            choices.forms]  # returns a list of our choices, f.e [True, True, False]
         result = Result.objects.get(uuid=res_uuid)
-        # result.update_result(order_num, question, selected_choices)
         result.update_result(result.current_order_number + 1, question, selected_choices)
 
         if result.state == Result.STATE.FINISHED:
@@ -122,8 +110,7 @@ class ExamResultQuestionView(LoginRequiredMixin, UpdateView):
                 'quizzes:question',
                 kwargs={
                     'uuid': uuid,
-                    'res_uuid': res_uuid,
-                    # 'order_num': order_num + 1
+                    'res_uuid': res_uuid
                 }
             )
         )
@@ -138,7 +125,6 @@ class ExamResultDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         uuid = self.kwargs.get('res_uuid')
         return self.get_queryset().get(uuid=uuid)
-
 
 # class ExamResultUpdateView(LoginRequiredMixin, UpdateView):
 #     def get(self, request, *args, **kwargs):

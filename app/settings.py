@@ -35,14 +35,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "account",
+    "account.apps.AccountsConfig",
     "django_extensions",
     "debug_toolbar",
     "crispy_forms",
     "crispy_bootstrap5",
     "ckeditor",
     "ckeditor_uploader",
-    "quiz"
+    'core.apps.CoreConfig',
+    'quiz.apps.QuizConfig',
 ]
 
 MIDDLEWARE = [
