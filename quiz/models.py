@@ -8,6 +8,8 @@ from django.db import models
 class Exam(BaseModel):
     QUESTION_MIN_LIMIT = 3
     QUESTION_MAX_LIMIT = 100
+    QUESTION_FIRST_NUMBER = 1
+    QUESTION_NUM_STEP = 1
 
     class LEVEL(models.IntegerChoices):
         BASIC = 0, 'Basic'
@@ -75,17 +77,11 @@ class Result(BaseModel):
         verbose_name_plural = 'Results'
 
     def update_result(self, order_number, question, selected_choices):
-        correct_choice = [choice.is_correct for choice in question.choices.all()]
+        correct_choice = [choice.is_correct for choice in
+                          question.choices.all()]  # returns a list, f.e. [True, False, False]
         correct_answer = True
         for z in zip(selected_choices, correct_choice):
             correct_answer = correct_answer & (z[0] == z[1])  # correct_answer &= (z[0] == z[1])
-
-        """
-            True    True        True
-            True    False       False
-            False   True        False
-            False   False       False
-        """
 
         self.num_correct_answers += int(correct_answer)
         self.num_incorrect_answers += 1 - int(correct_answer)
@@ -93,8 +89,15 @@ class Result(BaseModel):
 
         if order_number == question.exam.questions_count():
             self.state = self.STATE.FINISHED
+            self.user.update_rating(self.points())
 
         self.save()
 
     def points(self):
         return max(0, self.num_correct_answers - self.num_incorrect_answers)
+
+    def success_rate(self):
+        return int(self.num_correct_answers / self.exam.questions_count() * 100)
+
+    def time_elapsed(self):
+        return self.update_timestamp - self.create_timestamp
