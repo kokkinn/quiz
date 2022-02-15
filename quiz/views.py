@@ -18,31 +18,32 @@ class ExamListView(LoginRequiredMixin, ListView):
     context_object_name = 'exams'
 
 
-class ExamDetailView(LoginRequiredMixin, DetailView):
+class ExamDetailView(LoginRequiredMixin, DetailView, MultipleObjectMixin):
     model = Exam
     template_name = 'exams/details.html'
     context_object_name = 'exam'
     pk_url_kwarg = 'uuid'
+    paginate_by = 3
 
     def get_object(self, queryset=None):
         uuid = self.kwargs.get('uuid')
         return self.model.objects.get(uuid=uuid)
 
-    # def get_context_data(self, **kwargs):
-    #     # context = super().get_context_data(**kwargs)
-    #     # context['result_list'] = Result.objects.filter(
-    #     #     exam=self.get_object(),
-    #     #     user=self.request.user
-    #     # ).order_by('state')
-    #     context = super().get_context_data(object_list=self.get_queryset(), **kwargs)
-    #
-    #     return context
-    #
-    # def get_queryset(self):
-    #     return Result.objects.filter(
-    #         exam=self.get_object(),
-    #         user=self.request.user
-    #     ).order_by('state')
+    def get_context_data(self, **kwargs):
+        # context = super().get_context_data(**kwargs)
+        # context['result_list'] = Result.objects.filter(
+        #     exam=self.get_object(),
+        #     user=self.request.user
+        # ).order_by('state')
+        context = super().get_context_data(object_list=self.get_queryset(), **kwargs)
+
+        return context
+
+    def get_queryset(self):
+        return Result.objects.filter(
+            exam=self.get_object(),
+            user=self.request.user
+        ).order_by('state')
 
 
 class ExamResultCreateView(LoginRequiredMixin, CreateView):
@@ -126,25 +127,26 @@ class ExamResultDetailView(LoginRequiredMixin, DetailView):
         uuid = self.kwargs.get('res_uuid')
         return self.get_queryset().get(uuid=uuid)
 
-# class ExamResultUpdateView(LoginRequiredMixin, UpdateView):
-#     def get(self, request, *args, **kwargs):
-#         uuid = kwargs.get('uuid')
-#         res_uuid = kwargs.get('res_uuid')
-#         user = request.user
-#
-#         result = Result.objects.get(
-#             user=user,
-#             uuid=res_uuid,
-#             exam__uuid=uuid
-#         )
-#
-#         return HttpResponseRedirect(
-#             reverse(
-#                 'quizzes:question',
-#                 kwargs={
-#                     'uuid': uuid,
-#                     'res_uuid': result.uuid,
-#                     # 'order_num': result.current_order_number + 1
-#                 }
-#             )
-#         )
+
+class ExamResultUpdateView(LoginRequiredMixin, UpdateView):
+    def get(self, request, *args, **kwargs):
+        uuid = kwargs.get('uuid')
+        res_uuid = kwargs.get('res_uuid')
+        user = request.user
+
+        result = Result.objects.get(
+            user=user,
+            uuid=res_uuid,
+            exam__uuid=uuid
+        )
+
+        return HttpResponseRedirect(
+            reverse(
+                'quizzes:question',
+                kwargs={
+                    'uuid': uuid,
+                    'res_uuid': result.uuid,
+                    # 'order_num': result.current_order_number + 1
+                }
+            )
+        )
