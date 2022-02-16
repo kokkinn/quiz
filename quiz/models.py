@@ -27,6 +27,14 @@ class Exam(BaseModel):
     def questions_count(self):
         return self.questions.count()
 
+    def get_correct_perc_by_user(self, user):
+        exam_results = Result.objects.filter(user=user, exam=self)
+        correct_num = total_num = 0
+        for res in exam_results:
+            correct_num += res.num_correct_answers
+            total_num += res.num_incorrect_answers + res.num_correct_answers
+        return correct_num * 100 // total_num
+
     class Meta:
         verbose_name = 'Exam'
         verbose_name_plural = 'Exams'

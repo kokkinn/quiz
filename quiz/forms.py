@@ -44,6 +44,8 @@ class QuestionInlineFormset(BaseInlineFormSet):
 class ChoiceForm(ModelForm):
     is_selected = forms.BooleanField(required=False)
 
+
+
     class Meta:
         model = Choice
         fields = ['text', ]
