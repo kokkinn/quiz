@@ -1,7 +1,9 @@
+from django.contrib import messages
 from django.shortcuts import render
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import DetailView, CreateView, UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
 from django.views.generic import ListView
 from django.http import HttpResponseRedirect
 from django.shortcuts import reverse, render
@@ -92,7 +94,19 @@ class ExamResultQuestionView(LoginRequiredMixin, UpdateView):
         choices = ChoicesFormSet(data=request.POST)
         selected_choices = ['is_selected' in form.changed_data for form in
                             choices.forms]  # returns a list of our choices, f.e [True, True, False]
-        result = Result.objects.get(uuid=res_uuid)
+
+        if False not in selected_choices or True not in selected_choices:
+            messages.warning(request, 'Нельзя выбирать все ответы одновременно или ни одного')
+            choices = ChoicesFormSet(queryset=question.choices.all())
+            return render(request, 'exams/question.html',
+                          context={'question': question, 'choices': choices})
+        #
+        # if not (0 < sum(selected_choices) < len(choices)):
+        #     messages.warning(request, 'Нельзя выбирать все ответы одновременно или ни одного')
+        #     choices = ChoicesFormSet(queryset=question.choices.all())
+        #     return render(request, 'exams/question.html',
+        #                   context={'question': question, 'choices': choices})
+
         result.update_result(result.current_order_number + 1, question, selected_choices)
 
         if result.state == Result.STATE.FINISHED:
@@ -150,3 +164,16 @@ class ExamResultUpdateView(LoginRequiredMixin, UpdateView):
                 }
             )
         )
+
+
+class ExamResultDeleteView(DeleteView, LoginRequiredMixin):
+    model = Result
+    template_name = "results/delete.html"
+    context_object_name = "result"
+    pk_url_kwarg = 'uuid'
+
+    def get_object(self, queryset=None):
+        return Result.objects.get(uuid=self.kwargs['res_uuid'])
+
+    def get_success_url(self):
+        return reverse_lazy('quizzes:details', kwargs={'uuid': self.kwargs['uuid']})

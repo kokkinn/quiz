@@ -20,6 +20,7 @@ def expression(value, *args):
         value = value.replace(f'%{idx}', str(arg))
     return eval(value)
 
+
 # {% expression '(%1 - 1) * 100 // %2' 45 89 %}
 # '(45- 1) * 100 // 89'
 
@@ -27,5 +28,4 @@ def expression(value, *args):
 register.filter('negative', negative_value)
 register.filter('multi', multi)
 register.filter('dived', dived)
-
 register.simple_tag(func=expression, name='expression')
